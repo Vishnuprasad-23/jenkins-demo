@@ -1,5 +1,9 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'python:3.10-slim'
+    }
+  }
 
   stages {
     stage('Checkout') {
@@ -8,17 +12,10 @@ pipeline {
       }
     }
 
-    stage('Build') {
-      steps {
-        echo "Building project..."
-        sh 'cat index.html || echo "index.html not found"'
-      }
-    }
-
     stage('Install Dependencies') {
       steps {
         sh '''
-          python3 -m venv venv
+          python -m venv venv
           . venv/bin/activate
           pip install --upgrade pip
           pip install pytest
