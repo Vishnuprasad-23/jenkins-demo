@@ -1,30 +1,47 @@
 pipeline {
   agent any
 
-  tools {
-    git 'Default'
-  }
-
   stages {
     stage('Checkout') {
       steps {
-        echo "Checked out code"
+        echo "Code checkout complete."
       }
     }
+
     stage('Build') {
       steps {
         echo "Building project..."
-        sh 'cat index.html'
+        sh 'cat index.html || echo "index.html not found"'
+      }
+    }
+
+    stage('Install Dependencies') {
+      steps {
+        sh '''
+          python3 -m venv venv
+          . venv/bin/activate
+          pip install --upgrade pip
+          pip install pytest
+        '''
+      }
+    }
+
+    stage('Run Tests') {
+      steps {
+        sh '''
+          . venv/bin/activate
+          pytest --maxfail=1 --disable-warnings --tb=short
+        '''
       }
     }
   }
 
   post {
     success {
-      echo "Build succeeded!"
+      echo "Build and tests succeeded!"
     }
     failure {
-      echo "Build failed."
+      echo "Build or tests failed."
     }
   }
 }
