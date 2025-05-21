@@ -1,24 +1,14 @@
 pipeline {
-  agent {
-    docker {
-      image 'python:3.10-slim'
-    }
-  }
+  agent any
 
   stages {
-    stage('Checkout') {
-      steps {
-        echo "Code checkout complete."
-      }
-    }
-
-    stage('Install Dependencies') {
+    stage('Install Python & Dependencies') {
       steps {
         sh '''
-          python -m venv venv
+          which python3 || (apt-get update && apt-get install -y python3 python3-pip python3-venv)
+          python3 -m venv venv
           . venv/bin/activate
-          pip install --upgrade pip
-          pip install pytest
+          pip install -U pip pytest
         '''
       }
     }
@@ -27,18 +17,15 @@ pipeline {
       steps {
         sh '''
           . venv/bin/activate
-          pytest --maxfail=1 --disable-warnings --tb=short
+          pytest
         '''
       }
     }
   }
 
   post {
-    success {
-      echo "Build and tests succeeded!"
-    }
-    failure {
-      echo "Build or tests failed."
+    always {
+      echo 'Build or tests failed.'
     }
   }
 }
