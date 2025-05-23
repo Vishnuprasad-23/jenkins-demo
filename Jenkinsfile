@@ -24,11 +24,13 @@ pipeline {
 
     stage('Lint') {
       steps {
-          sh 'pip install flake8'
-          sh 'flake8 calculator.py'
+        sh '''
+          . venv/bin/activate
+          pip install flake8
+          flake8 calculator.py
+        '''
       }
-  }
-
+    }
   }
 
   post {
